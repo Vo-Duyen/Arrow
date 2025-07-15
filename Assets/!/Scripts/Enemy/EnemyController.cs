@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DesignPattern.ObjectPool;
 using DesignPattern.Observer;
 using UnityEngine;
 using UnityEngine.AI;
@@ -46,7 +47,7 @@ namespace _.Scripts.Enemy
 
         private void OnEnable()
         {
-            _enemyGetHit = param => GetHit((float)param);
+            _enemyGetHit = param => GetHit(((Transform, float)) param);
             
             ObserverManager<EventID>.Instance.RegisterEvent(EventID.EnemyGetHit, _enemyGetHit);
         }
@@ -135,15 +136,32 @@ namespace _.Scripts.Enemy
             }
         }
 
+        private void GetHit((Transform, float) param)
+        {
+            if (param.Item1 != transform) return;
+            GetHit(param.Item2);
+        }
+
         public void GetHit(float amount)
         {
             if (health <= amount - defense)
             {
-                health = 0;
-                animator.SetBool(Die, true);
+                StartCoroutine(DieAmin());
                 return;
             }
             health -= amount - defense;
+        }
+
+        private IEnumerator DieAmin()
+        {
+            WaitForSeconds wait = new WaitForSeconds(2f);
+            
+            health = 0;
+            animator.SetBool(Die, true);
+            GetComponent<Collider>().enabled = false;
+            agent.isStopped = true;
+            yield return wait;
+            PoolingManager.Despawn(gameObject);
         }
 
         private IEnumerator HealthRegenerate()

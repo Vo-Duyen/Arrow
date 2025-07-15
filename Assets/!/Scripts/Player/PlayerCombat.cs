@@ -113,7 +113,19 @@ namespace _.Scripts.Player
             GameObject arrowClone = PoolingManager.Spawn(arrow, transform.position + arrowOffset, Quaternion.identity);
             arrowClone.transform.SetParent(arrowParent);
             arrowClone.transform.LookAt(target);
-            _arrTween.Enqueue(arrowClone.transform.DOMove(target.position + Vector3.up, 1f));
+            _arrTween.Enqueue(arrowClone.transform.DOMove(target.position + Vector3.up, 1f).OnComplete(() =>
+            {
+                if (arrowClone.activeSelf)
+                {
+                    _arrTween.Enqueue(arrowClone.transform.DOMove(arrowClone.transform.position - Vector3.up, 0.5f).OnComplete(() =>
+                    {
+                        if (arrowClone.activeSelf)
+                        {
+                            PoolingManager.Despawn(arrowClone);
+                        }
+                    }));
+                }
+            }));
         }
 
         private IEnumerator LookAtTarget()

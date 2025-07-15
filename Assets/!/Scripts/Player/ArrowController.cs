@@ -13,7 +13,7 @@ namespace _.Scripts.Player
             if (other.CompareTag("Enemy"))
             {
                 PoolingManager.Despawn(gameObject);
-                ObserverManager<EventID>.Instance.PostEvent(EventID.EnemyGetHit, attackDamage);
+                ObserverManager<EventID>.Instance.PostEvent(EventID.EnemyGetHit, (other.transform, attackDamage));
             }
         }
     }
