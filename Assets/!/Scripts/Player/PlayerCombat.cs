@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DesignPattern.ObjectPool;
 using DesignPattern.Observer;
 using DG.Tweening;
 using UnityEngine;
@@ -31,6 +32,9 @@ namespace _.Scripts.Player
         [SerializeField] private float attackRange;
         [SerializeField] private float attackCooldown;
 
+        [SerializeField] private Transform objAttackRange;
+        private readonly Vector3 _scaleDefault = new Vector3(10f, 0f, 10f);
+
         private Coroutine _startAttack;
 
         private void Awake()
@@ -41,6 +45,10 @@ namespace _.Scripts.Player
             ApplyConfig();
 
             StartCoroutine(HealthRegenerate());
+            
+            // Create attack range and find enemy to attack
+            objAttackRange            = transform.GetChild(0);
+            objAttackRange.localScale = _scaleDefault * attackRange;
         }
 
         private void OnEnable()
