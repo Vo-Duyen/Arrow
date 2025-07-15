@@ -11,6 +11,8 @@ namespace _.Scripts.Player
 {
     public class PlayerCombat : MonoBehaviour, IDamageable
     {
+        private Queue<Tween> _arrTween = new Queue<Tween>();
+        
         private static readonly  int          IsWalking = Animator.StringToHash("IsWalking");
         private static readonly  int          Attack1   = Animator.StringToHash("Attack");
         private static readonly  int          Die       = Animator.StringToHash("Die");
@@ -32,11 +34,16 @@ namespace _.Scripts.Player
         [SerializeField] private float attackRange;
         [SerializeField] private float attackCooldown;
 
+        [SerializeField] private Transform  arrowParent;
+        [SerializeField] private GameObject arrow;
+        [SerializeField] private Vector3    arrowOffset = new Vector3(0f, 0.9f, 0f);
+        
+        [SerializeField] private Transform target;
+        public                   bool      isAttackDone;
+
         [SerializeField] private Transform objAttackRange;
         private readonly Vector3 _scaleDefault = new Vector3(10f, 0f, 10f);
-
-        private Coroutine _startAttack;
-
+        
         private void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
@@ -49,6 +56,8 @@ namespace _.Scripts.Player
             // Create attack range and find enemy to attack
             objAttackRange            = transform.GetChild(0);
             objAttackRange.localScale = _scaleDefault * attackRange;
+            
+            arrow.GetComponent<ArrowController>().attackDamage = attackDamage;
         }
 
         private void OnEnable()
@@ -61,6 +70,11 @@ namespace _.Scripts.Player
         private void OnDisable()
         {
             ObserverManager<EventID>.Instance.RemoveEvent(EventID.PlayerGetHit, _playerGetHit);
+
+            while (_arrTween.Count > 0)
+            {
+                _arrTween.Dequeue()?.Kill();
+            }
         }
 
         private void ApplyConfig()
@@ -87,26 +101,32 @@ namespace _.Scripts.Player
             agent.stoppingDistance      = playerData.stoppingDistance;
         }
 
+        public void StartAttack(Transform enemy)
+        {
+            target = enemy;
+            Attack();
+        }
         public void Attack()
         {
-            _startAttack ??= StartCoroutine(AttackDamage());
+            StartCoroutine(LookAtTarget());
+            animator.SetTrigger(Attack1);
+            GameObject arrowClone = PoolingManager.Spawn(arrow, transform.position + arrowOffset, Quaternion.identity);
+            arrowClone.transform.SetParent(arrowParent);
+            arrowClone.transform.LookAt(target);
+            _arrTween.Enqueue(arrowClone.transform.DOMove(target.position + Vector3.up, 1f));
         }
 
-        private IEnumerator AttackDamage()
+        private IEnumerator LookAtTarget()
         {
-            WaitForSeconds wait = new WaitForSeconds(attackCooldown);
-            while (true)
+            WaitForSeconds wait =  new WaitForSeconds(1f / 600);
+            while (!isAttackDone)
             {
-                // transform.LookAt(player);
-                // animator.SetTrigger(Attack1);
-                // yield return wait;
-                // if (Vector3.Distance(transform.position, player.position) > attackRange)
-                // {
-                //     agent.isStopped = false;
-                //     _startAttack    = null;
-                //     break;
-                // }
+                transform.LookAt(target);
+                transform.Rotate(0f, 90f, 0f);
+                yield return wait;
             }
+
+            isAttackDone = false;
         }
 
         public void GetHit(float amount)

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyData
   m_EditorClassIdentifier: 
   maxHealth: 100
-  defense: 5
+  defense: 1
   healthRegenRate: 0
   attackDamage: 10
   attackRange: 2

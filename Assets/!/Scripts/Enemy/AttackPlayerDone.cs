@@ -6,11 +6,12 @@ using UnityEngine;
 
 public class AttackPlayerDone : StateMachineBehaviour
 {
+    private EnemyController _enemyController;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
-    //override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    //{
-    //    
-    //}
+    public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        _enemyController ??= animator.GetComponent<EnemyController>();
+    }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     //override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -19,9 +20,9 @@ public class AttackPlayerDone : StateMachineBehaviour
     //}
 
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
-    override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.GetComponent<EnemyController>().CheckAttackPlayer();
+        _enemyController.CheckAttackPlayer();
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove()

@@ -12,6 +12,9 @@ namespace _.Scripts.Enemy
         private static readonly  int          IsWalking = Animator.StringToHash("IsWalking");
         private static readonly  int          Attack1   = Animator.StringToHash("Attack");
         private static readonly  int          Die       = Animator.StringToHash("Die");
+
+        private Action<object> _enemyGetHit;
+        
         [SerializeField] private EnemyData    enemyData;
         [SerializeField] private NavMeshAgent agent;
         [SerializeField] private Animator     animator;
@@ -41,6 +44,18 @@ namespace _.Scripts.Enemy
             StartCoroutine(HealthRegenerate());
         }
 
+        private void OnEnable()
+        {
+            _enemyGetHit = param => GetHit((float)param);
+            
+            ObserverManager<EventID>.Instance.RegisterEvent(EventID.EnemyGetHit, _enemyGetHit);
+        }
+
+        private void OnDisable()
+        {
+            ObserverManager<EventID>.Instance.RemoveEvent(EventID.EnemyGetHit, _enemyGetHit);
+        }
+        
         private void Update()
         {
             if (Vector3.Distance(transform.position, player.position) <= attackRange)

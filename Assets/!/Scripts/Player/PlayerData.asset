@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: PlayerData
   m_EditorClassIdentifier: 
   maxHealth: 100
-  defense: 5
+  defense: 0
   healthRegenRate: 0
   attackDamage: 10
-  attackRange: 5
+  attackRange: 3
   attackCooldown: 1
   attackSound: {fileID: 0}
   deathSound: {fileID: 0}
