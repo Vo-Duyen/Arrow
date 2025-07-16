@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using DesignPattern.ObjectPool;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace _.Scripts.Enemy
 {
@@ -16,7 +18,7 @@ namespace _.Scripts.Enemy
         
         private void Awake()
         {
-            agent = enemy.GetComponent<NavMeshAgent>();
+            agent          = enemy.GetComponent<NavMeshAgent>();
             _triangulation = NavMesh.CalculateTriangulation();
 
             StartCoroutine(SpawnEnemies());
@@ -28,15 +30,14 @@ namespace _.Scripts.Enemy
             int cntEnemy = 0;
             while (cntEnemy < numberOfEnemiesToSpawn)
             {
-                int        vertexIndex = UnityEngine.Random.Range(0, _triangulation.vertices.Length);
-                if (NavMesh.SamplePosition(_triangulation.vertices[vertexIndex], out NavMeshHit hit, 1f,
-                                           NavMesh.AllAreas))
+                int id = Random.Range(0, _triangulation.vertices.Length);
+                if (NavMesh.SamplePosition(_triangulation.vertices[id], out NavMeshHit hit, 2f, -1))
                 {
-                    agent.Warp(hit.position);
+                    GameObject enemyClone  = PoolingManager.Spawn(enemy, transform.position, Quaternion.identity);
+                    enemyClone.transform.SetParent(transform);
+                    enemyClone.GetComponent<NavMeshAgent>().Warp(hit.position);
+                    ++cntEnemy;
                 }
-                GameObject enemyClone  = PoolingManager.Spawn(enemy, transform.position, Quaternion.identity);
-                enemyClone.transform.SetParent(transform);
-                ++cntEnemy;
                 yield return wait;
             }
         }

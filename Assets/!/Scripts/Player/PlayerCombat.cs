@@ -146,6 +146,7 @@ namespace _.Scripts.Player
             if (health <= amount - defense)
             {
                 health = 0;
+                Time.timeScale = 0;
                 animator.SetBool(Die, true);
                 return;
             }
